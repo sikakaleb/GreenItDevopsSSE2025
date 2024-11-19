@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s  # Par défaut, scrape targets toutes les 15 secondes.
+  evaluation_interval: 15s  # Évaluer les règles toutes les 15 secondes.
+
+  external_labels:
+    monitor: 'codelab-monitor'  # Étiquette globale pour cette instance Prometheus
+
+rule_files:
+  - 'prometheus.rules.yml'  # Fichier de règles Prometheus
+
+scrape_configs:
+  # Surveiller Prometheus lui-même
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus:9090']  # Prometheus exposé via le réseau Docker
+
+  # Surveiller plusieurs instances Node Exporter
+  - job_name: 'node'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['node-exporter-8080:9100', 'node-exporter-8081:9100']  # Production
+        labels:
+          group: 'production'
+      - targets: ['node-exporter-8082:9100']  # Canary
+        labels:
+          group: 'canary'
